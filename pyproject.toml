@@ -1,0 +1,57 @@
+[project]
+name = "pompeji"
+version = "0.0.1"
+authors = [
+  { name="Andreas Baumgartner", email="tech@andreasbaumgartner.ch" },
+]
+description = "A Python Setuptool for building Python Applications"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://github.com/andreasbaumgartner/pompeji"
+Issues = "https://github.com/andreasbaumgartner/pompeji/issues"
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 88
+indent-width = 4
+
+[tool.ruff.format]
+quote_style = "double"
+indent_style = "space"
+docstring_code_format = false
+docstring_code_line_length = dynamic
