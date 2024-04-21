@@ -23,11 +23,10 @@ def check_python_installed():
         return sys.exit()
 
 
-# TODO: does not work yet
 def check_python_version():
     """check python version"""
     os.system("python3 --version")
-    if os.system("python3 --version") <= 3.10:
+    if os.system("python3 --version") >= 3.10:
         print("Please use Python 3.10 or higher")
         return sys.exit()
 
@@ -178,6 +177,7 @@ def main():
 if __name__ == "__main__":
     main()
     check_python_installed()
+    check_python_version()
     check_git_installed()
     basic_file_structure()
     create_virtual_environment()

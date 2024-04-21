@@ -54,6 +54,6 @@ line-length = 88
 indent-width = 4
 
 [tool.ruff.format]
-quote_style = "double"
-indent_style = "space"
-docstring_code_format = false
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = false
