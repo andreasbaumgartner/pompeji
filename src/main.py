@@ -1,6 +1,45 @@
 import inquirer
 import os
 import sys
+import platform
+
+# TODO: does not work yet
+
+
+def check_os_system():
+    """check operating system"""
+    if platform.system != "Linux":
+        print("Only Linux is supported")
+        return sys.exit()
+
+
+def check_python_installed():
+    """check if python is installed"""
+    os.system("python3 --version")
+    if os.system("python3 --version") == 0:
+        print("Python is installed")
+    else:
+        print("Python is not installed")
+        return sys.exit()
+
+
+# TODO: does not work yet
+def check_python_version():
+    """check python version"""
+    os.system("python3 --version")
+    if os.system("python3 --version") <= 3.10:
+        print("Please use Python 3.10 or higher")
+        return sys.exit()
+
+
+def check_git_installed():
+    """check if git is installed"""
+    os.system("git --version")
+    if os.system("git --version") == 0:
+        print("Git is installed")
+    else:
+        print("Git is not installed")
+        return sys.exit()
 
 
 def basic_file_structure() -> str:
@@ -73,7 +112,7 @@ def choise_git_repository():
     ]
     answer = inquirer.prompt(questions)
 
-    if answer["choice"] is "none":
+    if answer["choice"] == "none":
         print("No choice selected")
 
     if answer["choice"] == "gh":
@@ -138,7 +177,8 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # zsh got to the directory
+    check_python_installed()
+    check_git_installed()
     basic_file_structure()
     create_virtual_environment()
     choise_git_repository()

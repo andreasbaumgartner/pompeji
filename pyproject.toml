@@ -17,6 +17,10 @@ classifiers = [
 Homepage = "https://github.com/andreasbaumgartner/pompeji"
 Issues = "https://github.com/andreasbaumgartner/pompeji/issues"
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.ruff]
 exclude = [
     ".bzr",
@@ -46,7 +50,6 @@ exclude = [
     "site-packages",
     "venv",
 ]
-
 line-length = 88
 indent-width = 4
 
@@ -54,4 +57,3 @@ indent-width = 4
 quote_style = "double"
 indent_style = "space"
 docstring_code_format = false
-docstring_code_line_length = dynamic
