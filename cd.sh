@@ -1,7 +1,0 @@
-#!/bin/bash
-
-
-cd ./test/ 
-
-
-
