@@ -1,5 +1,5 @@
 <p align="center">
-	<img src=![](project_img.png)>
+	<img src=(project_img.png)>
 </p>
 <p align="center">
     <h1 align="center">POMPEJI</h1>
