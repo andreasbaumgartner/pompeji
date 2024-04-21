@@ -57,3 +57,11 @@ indent-width = 4
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = false
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+    "integration",
+]
