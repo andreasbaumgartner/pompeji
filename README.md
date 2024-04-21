@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="![project_img](https://github.com/andreasbaumgartner/pompeji/assets/64728689/a2653162-1954-4484-		b011-68d1761df0bd)alt="project_logo">
+	![](project_img.png)
 </p>
 <p align="center">
     <h1 align="center">POMPEJI</h1>
