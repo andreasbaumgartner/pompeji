@@ -1,3 +1,4 @@
+import inquirer
 import os
 import sys
 
@@ -60,6 +61,77 @@ def create_virtual_environment():
         print("Virtual environment will not be created")
 
 
+def choise_git_repository():
+    """user choise git init or use gh"""
+    # ask the user and let them select the choice
+    questions = [
+        inquirer.List(
+            "choice",
+            message="how do you want to create a git repository?",
+            choices=["git init", "gh", "none"],
+        )
+    ]
+    answer = inquirer.prompt(questions)
+
+    if answer["choice"] is "none":
+        print("No choice selected")
+
+    if answer["choice"] == "gh":
+        print(f"answer: {answer}")
+        create_github_repository()
+
+    if answer["choice"] == "git init":
+        print(f"answer: {answer}")
+        create_git_repository()
+
+
+def create_git_repository():
+    """create git repository"""
+    os.system(f"cd {sys.argv[1]} && git init")
+    print("Git repository created")
+
+
+def create_github_repository():
+    """create github repository"""
+    print("not supported yet")
+    return sys.exit()
+
+
+def use_pytest():
+    """use a pytest"""
+    print("Do you want to use pytest? (y/n)")
+    c_pytest = input()
+    if c_pytest == "y" or "yes":
+        os.system(f"cd {sys.argv[1]} && pip install -U pytest")
+        print("Pytest installed")
+    else:
+        print("Pytest will not be installed")
+
+
+def use_readme_template():
+    """use a readme template"""
+    # TODO: not implemented yet
+    pass
+
+
+def use_license_template():
+    """use a license template"""
+    # TODO: not implemented yet
+    pass
+
+
+def use_setup_cfg_template():
+    """use a setup.cfg template"""
+    # TODO: not implemented yet
+    pass
+
+
+def use_setup_nox_template():
+    """use a setup.nox template"""
+    # TODO: not implemented yet
+    pass
+
+
 def main():
     print("Project generator started")
 
@@ -69,3 +141,5 @@ if __name__ == "__main__":
     # zsh got to the directory
     basic_file_structure()
     create_virtual_environment()
+    choise_git_repository()
+    use_pytest()
