@@ -1,44 +1,7 @@
 import inquirer
 import os
 import sys
-import platform
-
-# TODO: does not work yet
-
-
-def check_os_system():
-    """check operating system"""
-    if platform.system != "Linux":
-        print("Only Linux is supported")
-        return sys.exit()
-
-
-def check_python_installed():
-    """check if python is installed"""
-    os.system("python3 --version")
-    if os.system("python3 --version") == 0:
-        print("Python is installed")
-    else:
-        print("Python is not installed")
-        return sys.exit()
-
-
-def check_python_version():
-    """check python version"""
-    os.system("python3 --version")
-    if os.system("python3 --version") >= 3.10:
-        print("Please use Python 3.10 or higher")
-        return sys.exit()
-
-
-def check_git_installed():
-    """check if git is installed"""
-    os.system("git --version")
-    if os.system("git --version") == 0:
-        print("Git is installed")
-    else:
-        print("Git is not installed")
-        return sys.exit()
+from check_sys import SystemCheck
 
 
 def basic_file_structure() -> str:
@@ -52,7 +15,7 @@ def basic_file_structure() -> str:
 
     except FileExistsError:
         print("Project already exists")
-        return sys.exit()
+        return sys.exit(1)
 
     except IndexError:
         print("Please provide an argument like: 'project_name'")
@@ -60,7 +23,7 @@ def basic_file_structure() -> str:
 
     except Exception as e:
         print(e)
-        return sys.exit()
+        return sys.exit(1)
 
     # create subdirectories
     os.makedirs(current_path + f"/{sys.argv[1]}/requirements")
@@ -176,9 +139,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-    check_python_installed()
-    check_python_version()
-    check_git_installed()
+    SystemCheck()
     basic_file_structure()
     create_virtual_environment()
     choise_git_repository()
