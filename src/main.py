@@ -92,10 +92,23 @@ class BaseQuestion:
         self.choices = []
         self.message = ""
         self.default = ""
-        self.default_choices = []
+
+    def choice_questions(
+        self, choices: list[str], message: str, default: str
+    ) -> dict[str, str] | None:
+        """Ask choice questions."""
+        questions = [
+            inquirer.List(
+                "choice",
+                message=message,
+                choices=choices,
+                default=default,
+            )
+        ]
+        return inquirer.prompt(questions)
 
     def multiple_choice_questions(
-        self, choices: list[str], message: str, default: list[str]
+        self, choices: list[str], message: str, default: str
     ) -> dict[str, str] | None:
         """Ask multiple choice questions."""
         questions = [
