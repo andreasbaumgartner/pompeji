@@ -1,0 +1,23 @@
+{
+	"base": [
+   	"README.md",
+	"LICENSE"
+	],
+
+	"services": [
+	"pip",
+	"virtualenv",
+	"git",
+	"docker",
+	"pytest",
+	"ruff"
+	],
+
+	"python": [
+	"python3.11"
+	],
+
+	"config": [
+	"pyproject.toml"
+	]
+}
