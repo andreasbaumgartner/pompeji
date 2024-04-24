@@ -18,17 +18,20 @@ class SystemCheck:
             print("Only Linux is supported")
             sys.exit(1)
 
+
     def check_python_installed(self):
         """check if python is installed"""
         if os.system("python3 --version") != 0:
             print("Python is not installed")
             sys.exit(1)
 
+
     def check_python_version(self):
         """check python version"""
         if os.system("python3 --version") >= 3.10:
             print("Please use Python 3.10 or higher")
             sys.exit(1)
+
 
     def check_git_installed(self):
         """check if git is installed"""
