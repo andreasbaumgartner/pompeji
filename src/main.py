@@ -1,3 +1,4 @@
+import json
 import inquirer
 import os
 import sys
@@ -12,14 +13,21 @@ class Application:
             print("Please provide an argument like: 'project_name'")
             sys.exit(1)
         project_name = sys.argv[1]
-        generator = BaseStructureGenerator(project_name)
-        generator.create_dir()
-        generator.create_subdirs()
-        file_generator = BaseFileGenerator(project_name)
-        file_generator.create_base_files()
-        service = BaseService()
-        service.ask_service()
-        service.create_service()
+        # generator = BaseStructureGenerator(project_name)
+        # generator.create_dir()
+        # generator.create_subdirs()
+        # file_generator = BaseFileGenerator(project_name)
+        # file_generator.create_base_files()
+        # service = BaseService()
+        # service.ask_service()
+        # service.create_service()
+        # TEST: Test with the template class
+
+        template = Template()
+        template.get_templates()
+        template.read_template("base.json")
+        template.convert_template()
+
         print(f"Project structure for '{project_name}' created successfully.")
 
 
@@ -73,13 +81,13 @@ class BaseFileGenerator:
     def create_base_files(self):
         """Create base files for a project."""
         for file in self.base_files:
-            open(os.path.join(self.current_path, self.project_name, file), "w").close()
+            open(os.path.join(self.current_path, self.project_name, file), "w").close()  # noqa: E501
 
     def create_subdir_files(self):
         """Create files in subdirectories."""
         for file in self.subdir_files:
             open(
-                os.path.join(self.current_path, self.project_name, self.subdir, file),
+                os.path.join(self.current_path, self.project_name, self.subdir, file),  # noqa: E501
                 "w",
             ).close()
 
@@ -193,7 +201,7 @@ class BaseService:
 
     def create_license(self) -> str:
         """Create LICENSE File."""
-        open(os.path.join(self.current_path, self.project_name, "LICENSE"), "a").close()
+        open(os.path.join(self.current_path, self.project_name, "LICENSE"), "a").close()  # noqa: E501
         return "License created"
 
     def create_setup_cfg(self):
@@ -205,6 +213,32 @@ class BaseService:
         """Create setup.nox."""
         print("Not implemented yet")
         return sys.exit(1)
+
+
+class Template:
+    """Base class for templates."""
+
+    def __init__(self):
+        self.template_path = os.path.join(os.getcwd(), "templates")
+        self.templates = []
+        self.template = None
+        self.template_name = None
+        self.worker = None
+
+    def get_templates(self):
+        """Return all available templates."""
+        self.templates = os.listdir(self.template_path)
+        return self.templates
+
+    def read_template(self, file_name):
+        with open(os.path.join(self.template_path, file_name), "r") as file:
+            self.template = file.read()
+            return self.template
+
+    def convert_template(self):
+        if self.template is not None:
+            self.worker = json.loads(self.template)
+            return self.worker
 
 
 if __name__ == "__main__":

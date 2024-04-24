@@ -5,7 +5,7 @@
     <h1 align="center">POMPEJI</h1>
 </p>
 <p align="center">
-    <em>Automated Python Project Setup!</em>
+    <em>Automated Python Project Setup with Templates!</em>
 </p>
 <p align="center">
 	<img src="https://img.shields.io/github/license/eli64s/readme-ai?style=flat&logo=opensourceinitiative&logoColor=white&color=0080ff" alt="license">
