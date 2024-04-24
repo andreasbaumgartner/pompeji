@@ -2,6 +2,8 @@ import json
 import inquirer
 import os
 import sys
+from argparse import ArgumentParser
+from rich.console import Console
 
 
 class Application:
@@ -9,10 +11,11 @@ class Application:
 
     @staticmethod
     def main():
-        if len(sys.argv) < 2:
-            print("Please provide an argument like: 'project_name'")
-            sys.exit(1)
-        project_name = sys.argv[1]
+        Messages().welcome_msg()
+        args = CommandParser()
+        option = args.get_option()
+        project_name = option.project_name
+        print(f"option: {option}")
         # generator = BaseStructureGenerator(project_name)
         # generator.create_dir()
         # generator.create_subdirs()
@@ -31,13 +34,87 @@ class Application:
         print(f"Project structure for '{project_name}' created successfully.")
 
 
+class Messages:
+    """Welcome message class."""
+
+    def __init__(self):
+        self.message = "Welcome to the Python project generator tool 🚀"
+        self.console = Console()
+
+    def welcome_msg(self):
+        """Display welcome message."""
+        self.console.print("#" * 48, style="bold blue")
+        self.console.print(self.message, style="bold blue")
+        self.console.print("#" * 48, style="bold blue")
+
+    def error_msg(self):
+        """Display error message."""
+        self.console.print("An error occurred", style="bold red")
+
+    def warning_msg(self):
+        """Display warning message."""
+        self.console.print("A warning occurred", style="bold yellow")
+
+    def notice_msg(self):
+        """Display notice message."""
+        self.console.print("A notice occurred", style="bold green")
+
+    def print_msg(self):
+        """Print message."""
+        self.console.print(self.message)
+
+
+class CommandParser:
+    """Parse command line arguments."""
+
+    def __init__(self):
+        self.args = sys.argv[1:]
+        self.option = None
+
+    def get_option(self):
+        """Get the option."""
+        arg_parser = ArgumentParser()
+        arg_parser.add_argument(
+            "-o",
+            "--option",
+            type=str,
+            help="Specify an option",
+        )
+        arg_parser.add_argument(
+            "project_name",
+            type=str,
+            help="Specify the project name",
+        )
+        arg_parser.add_argument(
+            "-s",
+            "--service",
+            type=str,
+            help="Specify a service",
+        )
+        arg_parser.add_argument(
+            "-t",
+            "--template",
+            type=str,
+            help="Specify a template",
+        )
+        arg_parser.add_argument(
+            "-c",
+            "--config",
+            type=str,
+            help="Specify a configuration file",
+        )
+        args = arg_parser.parse_args()
+
+        return args
+
+
 class BaseStructureGenerator:
     """Create basic file structure for a project."""
 
     def __init__(self, project_name):
         self.project_name = project_name
         self.current_path = os.getcwd()
-        self.err_message_exists = "Project already exists / cd into the project"
+        self.err_message_exists = "Project already exists / cd into the project"  # noqa: E501
         self.req_dir = "requirements"
 
     def create_dir(self):
@@ -54,7 +131,7 @@ class BaseStructureGenerator:
 
     def create_subdirs(self):
         """Create subdirectories."""
-        os.makedirs(os.path.join(self.current_path, self.project_name, self.req_dir))
+        os.makedirs(os.path.join(self.current_path, self.project_name, self.req_dir))  # noqa: E501
 
     def return_project_dir(self):
         """Return the project directory."""
