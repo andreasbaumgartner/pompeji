@@ -11,11 +11,43 @@ class Application:
 
     @staticmethod
     def main():
-        Messages().welcome_msg()
+        # base workflow
+        # ------------ #
+        msg = Messages()
+        msg.welcome_msg()
         args = CommandParser()
         option = args.get_option()
         project_name = option.project_name
-        print(f"option: {option}")
+
+        # templates
+        # ------------ #
+        # show user templates
+        template = Template()
+        templates = template.get_templates()
+        question = BaseQuestion()
+        s_template = question.multiple_choice_questions(
+            choices=templates,
+            message="Which Plugin you want do use?",
+        )
+        # print the selected template
+        msg.warning_msg(f"Selected Template: {s_template}")
+
+        # selected plugin
+        template.read_template("base.json")
+
+        # convert the plugin into actions
+        result = template.convert_template()
+        msg.success_msg(result)
+
+        msg.success_msg(f"Base: {template.base_files}")
+
+        # process the service for the base files
+        struct = BaseStructureGenerator()
+        struct.create_dir()
+        struct.return_project_dir()
+
+        # basic generation
+        # ------------ #
         # generator = BaseStructureGenerator(project_name)
         # generator.create_dir()
         # generator.create_subdirs()
@@ -25,11 +57,6 @@ class Application:
         # service.ask_service()
         # service.create_service()
         # TEST: Test with the template class
-
-        template = Template()
-        template.get_templates()
-        template.read_template("base.json")
-        template.convert_template()
 
         print(f"Project structure for '{project_name}' created successfully.")
 
@@ -47,13 +74,17 @@ class Messages:
         self.console.print(self.message, style="bold blue")
         self.console.print("#" * 48, style="bold blue")
 
-    def error_msg(self):
+    def error_msg(self, message: str = "An Error"):
         """Display error message."""
-        self.console.print("An error occurred", style="bold red")
+        self.console.print({message}, style="bold red")
 
-    def warning_msg(self):
+    def warning_msg(self, message: str = "A Warning"):
         """Display warning message."""
-        self.console.print("A warning occurred", style="bold yellow")
+        self.console.print(message, style="bold yellow")
+
+    def success_msg(self, message: str = "Success"):
+        """Display success message."""
+        self.console.print(message, style="bold green")
 
     def notice_msg(self):
         """Display notice message."""
@@ -193,18 +224,28 @@ class BaseQuestion:
         return inquirer.prompt(questions)
 
     def multiple_choice_questions(
-        self, choices: list[str], message: str, default: str
+        self, choices: list[str], message: str, default: str = None
     ) -> dict[str, str] | None:
         """Ask multiple choice questions."""
-        questions = [
-            inquirer.Checkbox(
-                "choice",
-                message=message,
-                choices=choices,
-                default=default,
-            )
-        ]
-        return inquirer.prompt(questions)
+        if default is not None:
+            questions = [
+                inquirer.Checkbox(
+                    "choice",
+                    message=message,
+                    choices=choices,
+                    default=default,
+                )
+            ]
+            return inquirer.prompt(questions)
+        else:
+            questions = [
+                inquirer.Checkbox(
+                    "choice",
+                    message=message,
+                    choices=choices,
+                )
+            ]
+            return inquirer.prompt(questions)
 
 
 class BaseService:
@@ -299,8 +340,10 @@ class Template:
         self.template_path = os.path.join(os.getcwd(), "templates")
         self.templates = []
         self.template = None
-        self.template_name = None
-        self.worker = None
+        self.base_files = []
+        self.services = []
+        self.python_version = None
+        self.config = None
 
     def get_templates(self):
         """Return all available templates."""
@@ -308,14 +351,22 @@ class Template:
         return self.templates
 
     def read_template(self, file_name):
+        """Read the template file"""
         with open(os.path.join(self.template_path, file_name), "r") as file:
             self.template = file.read()
             return self.template
 
-    def convert_template(self):
+    def convert_template(self) -> str:
+        """Convert a selected .json template"""
         if self.template is not None:
-            self.worker = json.loads(self.template)
-            return self.worker
+            data = json.loads(self.template)
+
+            self.base_files = data["base"]
+            self.services = data["services"]
+            self.python_version = data["python"]
+            self.config = data["config"]
+
+            return (self.base_files, self.services, self.python_version, self.config)
 
 
 if __name__ == "__main__":
