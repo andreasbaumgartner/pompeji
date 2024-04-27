@@ -27,13 +27,14 @@ class Application:
         question = BaseQuestion()
         s_template = question.multiple_choice_questions(
             choices=templates,
-            message="Which Plugin you want do use?",
+            message="Which Template you wana use?",
         )
         # print the selected template
-        msg.warning_msg(f"Selected Template: {s_template}")
+        msg.warning_msg(f"Selected Template: {s_template['choice'][0]}")
 
         # selected plugin
-        template.read_template("base.json")
+        # TODO: Dynamic
+        template.read_template(s_template["choice"][0])
 
         # convert the plugin into actions
         result = template.convert_template()
@@ -42,9 +43,13 @@ class Application:
         msg.success_msg(f"Base: {template.base_files}")
 
         # process the service for the base files
-        struct = BaseStructureGenerator()
+        struct = BaseStructureGenerator(project_name)
         struct.create_dir()
-        struct.return_project_dir()
+        project_path = struct.return_project_dir()
+
+        file = FileService(project_path)
+        file.create_file(template.base_files)
+        file.create_file_with_subdir(template.subdir)
 
         # basic generation
         # ------------ #
@@ -333,6 +338,32 @@ class BaseService:
         return sys.exit(1)
 
 
+class FileService(Messages):
+    """Class to create file as a service"""
+
+    def __init__(self, project_path: str):
+        self.services = []
+        self.project_path = project_path
+        self.req_dir = "requirements"
+
+    def create_file(self, files):
+        """create file based on the files provided"""
+        for file in files:
+            open(os.path.join(self.project_path, file), "w").close()  # noqa: E501
+            self.services.append(file)
+
+    def create_file_with_subdir(self, files):
+        """create file with subdir necessary"""
+
+        for file in files:
+            if "requirements" in file:
+                os.makedirs(os.path.join(self.project_path, self.req_dir))  # noqa: E501
+                open(os.path.join(self.project_path, self.req_dir, file), "w").close()
+                self.services.append(file)
+            else:
+                Messages.error_msg("File for Subdir not supported")
+
+
 class Template:
     """Base class for templates."""
 
@@ -341,6 +372,7 @@ class Template:
         self.templates = []
         self.template = None
         self.base_files = []
+        self.subdir = []
         self.services = []
         self.python_version = None
         self.config = None
@@ -362,11 +394,18 @@ class Template:
             data = json.loads(self.template)
 
             self.base_files = data["base"]
+            self.subdir = data["subdir_files"]
             self.services = data["services"]
             self.python_version = data["python"]
             self.config = data["config"]
 
-            return (self.base_files, self.services, self.python_version, self.config)
+            return (
+                self.base_files,
+                self.subdir,
+                self.services,
+                self.python_version,
+                self.config,
+            )
 
 
 if __name__ == "__main__":
