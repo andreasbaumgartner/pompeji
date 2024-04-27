@@ -36,6 +36,7 @@ class Application:
         # TODO: Dynamic
         template.read_template(s_template["choice"][0])
 
+
         # convert the plugin into actions
         result = template.convert_template()
         msg.success_msg(result)
@@ -43,6 +44,7 @@ class Application:
         msg.success_msg(f"Base: {template.base_files}")
 
         # process the service for the base files
+
         struct = BaseStructureGenerator(project_name)
         struct.create_dir()
         project_path = struct.return_project_dir()
@@ -50,6 +52,7 @@ class Application:
         file = FileService(project_path)
         file.create_file(template.base_files)
         file.create_file_with_subdir(template.subdir)
+
 
         # basic generation
         # ------------ #
@@ -392,7 +395,6 @@ class Template:
         """Convert a selected .json template"""
         if self.template is not None:
             data = json.loads(self.template)
-
             self.base_files = data["base"]
             self.subdir = data["subdir_files"]
             self.services = data["services"]
@@ -406,6 +408,7 @@ class Template:
                 self.python_version,
                 self.config,
             )
+
 
 
 if __name__ == "__main__":

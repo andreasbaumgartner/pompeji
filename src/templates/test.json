@@ -3,9 +3,11 @@
    	"README.md"
 	],
 
-        "subdir_files": [
-        "requirements.txt"
-        ],
+
+   "subdir_files": [
+      "requirements.txt"
+     ],
+
 
 	"services": [
 	"pip"
