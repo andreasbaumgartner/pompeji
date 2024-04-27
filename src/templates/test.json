@@ -1,16 +1,17 @@
 {
 	"base": [
-   	"README.md"
+   	"README.md",
+	"LICENSE",
+	"setup.py"
 	],
 
-
-   "subdir_files": [
-      "requirements.txt"
-     ],
-
+        "subdir_files": [
+	 "requirements.txt"
+	],
 
 	"services": [
-	"pip"
+        "git",
+        "virtualenv"
 	],
 
 	"python": [

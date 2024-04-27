@@ -1,8 +1,9 @@
 import json
-import inquirer
 import os
 import sys
 from argparse import ArgumentParser
+
+import inquirer
 from rich.console import Console
 
 
@@ -36,7 +37,6 @@ class Application:
         # TODO: Dynamic
         template.read_template(s_template["choice"][0])
 
-
         # convert the plugin into actions
         result = template.convert_template()
         msg.success_msg(result)
@@ -53,6 +53,10 @@ class Application:
         file.create_file(template.base_files)
         file.create_file_with_subdir(template.subdir)
 
+        # services
+        # ------------ #
+        service = BaseService()
+        service.run_service(template.services)
 
         # basic generation
         # ------------ #
@@ -73,18 +77,18 @@ class Messages:
     """Welcome message class."""
 
     def __init__(self):
-        self.message = "Welcome to the Python project generator tool 🚀"
+        self.message = "🚀 Welcome to the Python project generator tool 🚀"
         self.console = Console()
 
     def welcome_msg(self):
         """Display welcome message."""
-        self.console.print("#" * 48, style="bold blue")
+        self.console.print("#" * 50, style="bold blue")
         self.console.print(self.message, style="bold blue")
-        self.console.print("#" * 48, style="bold blue")
+        self.console.print("#" * 50, style="bold blue")
 
     def error_msg(self, message: str = "An Error"):
         """Display error message."""
-        self.console.print({message}, style="bold red")
+        self.console.print(message, style="bold red")
 
     def warning_msg(self, message: str = "A Warning"):
         """Display warning message."""
@@ -304,6 +308,27 @@ class BaseService:
         else:
             print("No service selected")
 
+    def run_service(self, services: list[str]) -> str:
+        """Run service from a given list. Only for supported services."""
+        for service in services:
+            if service in self.services:
+                if service == "git":
+                    self.create_git_repository()
+                elif service == "github":
+                    self.create_github_repository()
+                elif service == "pytest":
+                    self.create_pytest()
+                elif service == "LICENSE":
+                    self.create_license()
+                elif service == "setup.cfg":
+                    self.create_setup_cfg()
+                elif service == "setup.nox":
+                    self.create_setup_nox()
+                elif service == "virtualenv":
+                    self.create_virtual_environment()
+            else:
+                print(f"Service {service} not supported yet")
+
     def create_virtual_environment(self):
         """Create virtual environment."""
         os.system(f"cd {self.project_name} && python3 -m venv venv")
@@ -408,7 +433,6 @@ class Template:
                 self.python_version,
                 self.config,
             )
-
 
 
 if __name__ == "__main__":
