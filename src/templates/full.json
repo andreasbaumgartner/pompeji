@@ -1,21 +1,18 @@
 {
-	"base": [
+	"files": [
    	"README.md",
 	"LICENSE",
 	"setup.py"
 	],
 
         "subdir_files": [
-	 "requirements.txt"
+	"requirements.txt",
+        "dev_requirements.txt"
 	],
 
 	"services": [
         "git",
         "virtualenv"
-	],
-
-	"python": [
-	"python3.11"
 	],
 
 	"config": [

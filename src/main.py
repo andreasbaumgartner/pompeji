@@ -20,57 +20,84 @@ class Application:
         option = args.get_option()
         project_name = option.project_name
 
-        # templates
+        # ask user for manual or template
         # ------------ #
-        # show user templates
-        template = Template()
-        templates = template.get_templates()
         question = BaseQuestion()
-        s_template = question.multiple_choice_questions(
-            choices=templates,
-            message="Which Template you wana use?",
+        process_qs = question.choice_questions(
+            choices=["Manual", "Template"],
+            message="Do you want to create a project manually or use a template?",  # noqa: E501
+            default="Manual",
         )
-        # print the selected template
-        msg.warning_msg(f"Selected Template: {s_template['choice'][0]}")
 
-        # selected plugin
-        # TODO: Dynamic
-        template.read_template(s_template["choice"][0])
+        if process_qs["choice"] == "Template":
+            # templates
+            # ------------ #
+            # show user templates
+            template = Template()
+            templates = template.get_templates()
+            question = BaseQuestion()
+            s_template = question.multiple_choice_questions(
+                choices=templates,
+                message="Which Template you wana use?",
+            )
+            # print the selected template
+            try:
+                msg.warning_msg(f"Selected Template: {s_template['choice'][0]}")  # noqa: E501
 
-        # convert the plugin into actions
-        result = template.convert_template()
-        msg.success_msg(result)
+            except KeyError:
+                msg.error_msg("No template selected")
+                sys.exit(1)
 
-        msg.success_msg(f"Base: {template.base_files}")
+            except IndexError:
+                msg.error_msg("No template selected")
+                sys.exit(1)
 
-        # process the service for the base files
+            # selected plugin
+            # TODO:Check if it not None
+            template.read_template(s_template["choice"][0])
 
-        struct = BaseStructureGenerator(project_name)
-        struct.create_dir()
-        project_path = struct.return_project_dir()
+            # convert the plugin into actions
+            result = template.convert_template()
+            msg.success_msg(result)
 
-        file = FileService(project_path)
-        file.create_file(template.base_files)
-        file.create_file_with_subdir(template.subdir)
+            msg.success_msg(f"Base: {template.base_files}")
 
-        # services
-        # ------------ #
-        service = BaseService()
-        service.run_service(template.services)
+            # process the service for the base files
 
-        # basic generation
-        # ------------ #
-        # generator = BaseStructureGenerator(project_name)
-        # generator.create_dir()
-        # generator.create_subdirs()
-        # file_generator = BaseFileGenerator(project_name)
-        # file_generator.create_base_files()
-        # service = BaseService()
-        # service.ask_service()
-        # service.create_service()
-        # TEST: Test with the template class
+            struct = BaseStructureGenerator(project_name)
+            struct.create_dir()
+            project_path = struct.return_project_dir()
 
-        print(f"Project structure for '{project_name}' created successfully.")
+            file = FileService(project_path)
+            file.create_file(template.base_files)
+            file.create_file_with_subdir(template.subdir)
+
+            # services
+            # ------------ #
+            service = BaseService()
+            need_config = service.run_service(template.services)
+
+            # config
+            # ------------ #
+            config = Config()
+            config.read_config(need_config)
+            config.write_config(project_path)
+
+        elif process_qs["choice"] == "Manual":
+            # basic generation
+            # ------------ #
+            generator = BaseStructureGenerator(project_name)
+            generator.create_dir()
+            generator.create_subdirs()
+            file_generator = BaseFileGenerator(project_name)
+            file_generator.create_base_files()
+            service = BaseService()
+            service.ask_service()
+            need_config = service.create_service()
+
+        else:
+            msg.error_msg("No option selected")
+            sys.exit(1)
 
 
 class Messages:
@@ -279,6 +306,7 @@ class BaseService:
             "setup.nox",
         ]
         self.defaults = ["git", "readme"]
+        self.need_config = []
 
     def ask_service(self):
         """Create service."""
@@ -297,16 +325,20 @@ class BaseService:
                     self.create_github_repository()
                 elif choice == "pytest":
                     self.create_pytest()
+                    self.need_config.append("pytest")
                 elif choice == "LICENSE":
                     self.create_license()
                 elif choice == "setup.cfg":
                     self.create_setup_cfg()
                 elif choice == "setup.nox":
                     self.create_setup_nox()
+                    self.need_config.append("nox")
                 elif choice == "virtualenv":
                     self.create_virtual_environment()
         else:
             print("No service selected")
+
+        return self.need_config
 
     def run_service(self, services: list[str]) -> str:
         """Run service from a given list. Only for supported services."""
@@ -318,16 +350,20 @@ class BaseService:
                     self.create_github_repository()
                 elif service == "pytest":
                     self.create_pytest()
+                    self.need_config.append("pytest")
                 elif service == "LICENSE":
                     self.create_license()
                 elif service == "setup.cfg":
                     self.create_setup_cfg()
                 elif service == "setup.nox":
                     self.create_setup_nox()
+                    self.need_config.append("nox")
                 elif service == "virtualenv":
                     self.create_virtual_environment()
             else:
                 print(f"Service {service} not supported yet")
+
+        return self.need_config
 
     def create_virtual_environment(self):
         """Create virtual environment."""
@@ -385,8 +421,11 @@ class FileService(Messages):
 
         for file in files:
             if "requirements" in file:
-                os.makedirs(os.path.join(self.project_path, self.req_dir))  # noqa: E501
-                open(os.path.join(self.project_path, self.req_dir, file), "w").close()
+                os.makedirs(
+                    os.path.join(self.project_path, self.req_dir),
+                    exist_ok=True,
+                )
+                open(os.path.join(self.project_path, self.req_dir, file), "w").close()  # noqa: E501
                 self.services.append(file)
             else:
                 Messages.error_msg("File for Subdir not supported")
@@ -420,19 +459,43 @@ class Template:
         """Convert a selected .json template"""
         if self.template is not None:
             data = json.loads(self.template)
-            self.base_files = data["base"]
+            self.base_files = data["files"]
             self.subdir = data["subdir_files"]
             self.services = data["services"]
-            self.python_version = data["python"]
             self.config = data["config"]
 
             return (
                 self.base_files,
                 self.subdir,
                 self.services,
-                self.python_version,
                 self.config,
             )
+
+
+class Config:
+    """Configuration class."""
+
+    def __init__(self):
+        self.configs = []
+
+    def read_config(self, configs: list[str]):
+        """Read the configuration and store it in a .json file."""
+        for config in configs:
+            self.configs.append(config)
+
+    def write_config(self, project_path: str = None):
+        """Write the configuration to a .json file."""
+        for line in self.configs:
+            if line == "pytest":
+                # write to project path pyproject.toml
+                with open(os.path.join(project_path, "pyproject.toml"), "w") as file:  # noqa: E501
+                    # TODO: add example pytest config
+                    file.write("[tool.pytest.ini_options]\naddopts = '-v'\n")
+                    file.write("TestConifg = 'pytest.ini'")
+                    file.close()
+
+            elif line == "nox":
+                print("Not implemented yet")
 
 
 if __name__ == "__main__":

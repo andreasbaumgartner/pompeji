@@ -1,20 +1,20 @@
 {
-	"base": [
+	"files": [
   	"README.md",
-	"LICENSE"
+	"LICENSE",
+	"pyproject.toml"
+	],
+
+        "subdir_files": [
+	"requirements.txt"
 	],
 
 	"services": [
 	"pip",
 	"virtualenv",
-	"git",
 	"docker",
 	"pytest",
 	"ruff"
-	],
-
-	"python": [
-	"python3.11"
 	],
 
 	"config": [
