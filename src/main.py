@@ -2,6 +2,8 @@ import json
 import inquirer
 import os
 import sys
+from argparse import ArgumentParser
+from rich.console import Console
 
 
 class Application:
@@ -9,10 +11,43 @@ class Application:
 
     @staticmethod
     def main():
-        if len(sys.argv) < 2:
-            print("Please provide an argument like: 'project_name'")
-            sys.exit(1)
-        project_name = sys.argv[1]
+        # base workflow
+        # ------------ #
+        msg = Messages()
+        msg.welcome_msg()
+        args = CommandParser()
+        option = args.get_option()
+        project_name = option.project_name
+
+        # templates
+        # ------------ #
+        # show user templates
+        template = Template()
+        templates = template.get_templates()
+        question = BaseQuestion()
+        s_template = question.multiple_choice_questions(
+            choices=templates,
+            message="Which Plugin you want do use?",
+        )
+        # print the selected template
+        msg.warning_msg(f"Selected Template: {s_template}")
+
+        # selected plugin
+        template.read_template("base.json")
+
+        # convert the plugin into actions
+        result = template.convert_template()
+        msg.success_msg(result)
+
+        msg.success_msg(f"Base: {template.base_files}")
+
+        # process the service for the base files
+        struct = BaseStructureGenerator()
+        struct.create_dir()
+        struct.return_project_dir()
+
+        # basic generation
+        # ------------ #
         # generator = BaseStructureGenerator(project_name)
         # generator.create_dir()
         # generator.create_subdirs()
@@ -23,12 +58,85 @@ class Application:
         # service.create_service()
         # TEST: Test with the template class
 
-        template = Template()
-        template.get_templates()
-        template.read_template("base.json")
-        template.convert_template()
-
         print(f"Project structure for '{project_name}' created successfully.")
+
+
+class Messages:
+    """Welcome message class."""
+
+    def __init__(self):
+        self.message = "Welcome to the Python project generator tool 🚀"
+        self.console = Console()
+
+    def welcome_msg(self):
+        """Display welcome message."""
+        self.console.print("#" * 48, style="bold blue")
+        self.console.print(self.message, style="bold blue")
+        self.console.print("#" * 48, style="bold blue")
+
+    def error_msg(self, message: str = "An Error"):
+        """Display error message."""
+        self.console.print({message}, style="bold red")
+
+    def warning_msg(self, message: str = "A Warning"):
+        """Display warning message."""
+        self.console.print(message, style="bold yellow")
+
+    def success_msg(self, message: str = "Success"):
+        """Display success message."""
+        self.console.print(message, style="bold green")
+
+    def notice_msg(self):
+        """Display notice message."""
+        self.console.print("A notice occurred", style="bold green")
+
+    def print_msg(self):
+        """Print message."""
+        self.console.print(self.message)
+
+
+class CommandParser:
+    """Parse command line arguments."""
+
+    def __init__(self):
+        self.args = sys.argv[1:]
+        self.option = None
+
+    def get_option(self):
+        """Get the option."""
+        arg_parser = ArgumentParser()
+        arg_parser.add_argument(
+            "-o",
+            "--option",
+            type=str,
+            help="Specify an option",
+        )
+        arg_parser.add_argument(
+            "project_name",
+            type=str,
+            help="Specify the project name",
+        )
+        arg_parser.add_argument(
+            "-s",
+            "--service",
+            type=str,
+            help="Specify a service",
+        )
+        arg_parser.add_argument(
+            "-t",
+            "--template",
+            type=str,
+            help="Specify a template",
+        )
+        arg_parser.add_argument(
+            "-c",
+            "--config",
+            type=str,
+            help="Specify a configuration file",
+        )
+        args = arg_parser.parse_args()
+
+        return args
 
 
 class BaseStructureGenerator:
@@ -37,7 +145,7 @@ class BaseStructureGenerator:
     def __init__(self, project_name):
         self.project_name = project_name
         self.current_path = os.getcwd()
-        self.err_message_exists = "Project already exists / cd into the project"
+        self.err_message_exists = "Project already exists / cd into the project"  # noqa: E501
         self.req_dir = "requirements"
 
     def create_dir(self):
@@ -54,7 +162,7 @@ class BaseStructureGenerator:
 
     def create_subdirs(self):
         """Create subdirectories."""
-        os.makedirs(os.path.join(self.current_path, self.project_name, self.req_dir))
+        os.makedirs(os.path.join(self.current_path, self.project_name, self.req_dir))  # noqa: E501
 
     def return_project_dir(self):
         """Return the project directory."""
@@ -116,18 +224,28 @@ class BaseQuestion:
         return inquirer.prompt(questions)
 
     def multiple_choice_questions(
-        self, choices: list[str], message: str, default: str
+        self, choices: list[str], message: str, default: str = None
     ) -> dict[str, str] | None:
         """Ask multiple choice questions."""
-        questions = [
-            inquirer.Checkbox(
-                "choice",
-                message=message,
-                choices=choices,
-                default=default,
-            )
-        ]
-        return inquirer.prompt(questions)
+        if default is not None:
+            questions = [
+                inquirer.Checkbox(
+                    "choice",
+                    message=message,
+                    choices=choices,
+                    default=default,
+                )
+            ]
+            return inquirer.prompt(questions)
+        else:
+            questions = [
+                inquirer.Checkbox(
+                    "choice",
+                    message=message,
+                    choices=choices,
+                )
+            ]
+            return inquirer.prompt(questions)
 
 
 class BaseService:
@@ -222,8 +340,10 @@ class Template:
         self.template_path = os.path.join(os.getcwd(), "templates")
         self.templates = []
         self.template = None
-        self.template_name = None
-        self.worker = None
+        self.base_files = []
+        self.services = []
+        self.python_version = None
+        self.config = None
 
     def get_templates(self):
         """Return all available templates."""
@@ -231,14 +351,22 @@ class Template:
         return self.templates
 
     def read_template(self, file_name):
+        """Read the template file"""
         with open(os.path.join(self.template_path, file_name), "r") as file:
             self.template = file.read()
             return self.template
 
-    def convert_template(self):
+    def convert_template(self) -> str:
+        """Convert a selected .json template"""
         if self.template is not None:
-            self.worker = json.loads(self.template)
-            return self.worker
+            data = json.loads(self.template)
+
+            self.base_files = data["base"]
+            self.services = data["services"]
+            self.python_version = data["python"]
+            self.config = data["config"]
+
+            return (self.base_files, self.services, self.python_version, self.config)
 
 
 if __name__ == "__main__":

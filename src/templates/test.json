@@ -1,0 +1,17 @@
+{
+	"base": [
+   	"README.md"
+	],
+
+	"services": [
+	"pip"
+	],
+
+	"python": [
+	"python3.11"
+	],
+
+	"config": [
+	"pyproject.toml"
+	]
+}
