@@ -490,7 +490,7 @@ class Config:
                 # write to project path pyproject.toml
                 with open(os.path.join(project_path, "pyproject.toml"), "w") as file:  # noqa: E501
                     # TODO: add example pytest config
-                    file.write("[tool.pytest.ini_options]\naddopts = '-v'\n")
+                    file.write("#pyproject.toml\n[tool.pytest.ini_options]\nminversion = '6.0'\naddopts = '-ra -q'\n testpaths = ['tests','intergration',\n]")
                     file.write("TestConifg = 'pytest.ini'")
                     file.close()
 
